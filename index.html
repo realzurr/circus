@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Circus Atari — Edição Web Moderna</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Header / HUD -->
+    <header class="hud-bar">
+      <div class="brand">
+        <div class="brand-badge">🎪</div>
+        <div>
+          <h1>CIRCUS <span>WEB EDITION</span></h1>
+          <p class="subtitle">
+            Remaster por <a href="https://github.com/realzurr" target="_blank" rel="noopener noreferrer" class="credit-link">github.com/realzurr</a> • <code>CIRCUS.BIN</code> (Atari 2600)
+          </p>
+        </div>
+      </div>
+
+      <div class="scoreboard">
+        <div class="score-card active" id="p1Card">
+          <span class="score-label">JOGADOR 1</span>
+          <span class="score-value" id="p1Score">00000</span>
+          <div class="lives-row" id="p1Lives" title="Trapezistas restantes"></div>
+        </div>
+
+        <div class="score-card hi-card">
+          <span class="score-label">RECORDE</span>
+          <span class="score-value" id="hiScore">00000</span>
+          <span class="mode-pill" id="activeModeLabel">Modo 1 • Clássico</span>
+        </div>
+
+        <div class="score-card" id="p2Card">
+          <span class="score-label">JOGADOR 2</span>
+          <span class="score-value" id="p2Score">00000</span>
+          <div class="lives-row" id="p2Lives" title="Trapezistas restantes"></div>
+        </div>
+      </div>
+
+      <div class="hud-controls">
+        <button id="btnMusic" class="icon-btn active" title="Música de Circo (Calliope)">
+          🎵 <span>Música</span>
+        </button>
+        <button id="btnSfx" class="icon-btn active" title="Efeitos Sonoros">
+          🔊 <span>SFX</span>
+        </button>
+        <button id="btnVisual" class="icon-btn" title="Alternar Gráficos Modernos HD / Retrô 2600">
+          ✨ <span id="visualLabel">HD Moderno</span>
+        </button>
+        <button id="btnRules" class="icon-btn" title="Ver Regras Extraídas da ROM">
+          📜 <span>Regras</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Arena Area -->
+    <main class="arena-wrapper">
+      <div class="canvas-container" id="canvasContainer">
+        <canvas id="gameCanvas" width="960" height="640"></canvas>
+
+        <!-- Overlay Menu (Start / Pause / Game Over) -->
+        <div class="arena-overlay" id="arenaOverlay">
+          <div class="overlay-card">
+            <div class="overlay-tent-crown">🎪 GRAND CHAPITEAU 🎪</div>
+            <h2 id="overlayTitle">CIRCUS</h2>
+            <p id="overlaySubtitle">
+              Controle a gangorra, impulsione a dupla de trapezistas e colete as moedas que circulam no teto da arena!
+            </p>
+
+            <div class="config-grid">
+              <div class="config-group">
+                <label for="selectVariation">Variação do Jogo (ROM <code>$F809</code>)</label>
+                <select id="selectVariation">
+                  <option value="1">Jogo 1 — Clássico (Rebate nas moedas)</option>
+                  <option value="3">Jogo 3 — Barreiras Móveis</option>
+                  <option value="5">Jogo 5 — Super Salto (Atravessa moedas)</option>
+                  <option value="7">Jogo 7 — Atravessa Moedas + Barreiras</option>
+                  <option value="9">Jogo 9 — Limpeza Total (Só repõe após limpar as 3 fileiras)</option>
+                  <option value="11">Jogo 11 — Limpeza Total + Barreiras</option>
+                </select>
+              </div>
+
+              <div class="config-group">
+                <label for="selectPlayers">Jogadores</label>
+                <select id="selectPlayers">
+                  <option value="1">1 Jogador</option>
+                  <option value="2">2 Jogadores (Alternado)</option>
+                  <option value="2_coop">2 Jogadores (Moedas Compartilhadas - Jogo 13/14)</option>
+                </select>
+              </div>
+
+              <div class="config-group">
+                <label for="selectDifficulty">Chave de Dificuldade (Atari B / A)</label>
+                <select id="selectDifficulty">
+                  <option value="normal">Normal (B) — Velocidade Padrão (Curvas 1–3)</option>
+                  <option value="expert">Expert (A) — Gangorra Menor &amp; Impulso Turbo (Curvas 1–5)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="scoring-preview">
+              <div class="coin-tier gold">
+                <span class="coin-icon">🪙</span>
+                <div>
+                  <strong>Fileira Superior (Ouro →)</strong>
+                  <span>10 pts • Limpar: +100 pts + 1 Vida Extra!</span>
+                </div>
+              </div>
+              <div class="coin-tier silver">
+                <span class="coin-icon">💿</span>
+                <div>
+                  <strong>Fileira Central (Prata ←)</strong>
+                  <span>5 pts • Limpar: +50 pts</span>
+                </div>
+              </div>
+              <div class="coin-tier bronze">
+                <span class="coin-icon">🥉</span>
+                <div>
+                  <strong>Fileira Inferior (Bronze →)</strong>
+                  <span>2 pts • Limpar: +20 pts</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="overlay-actions">
+              <button id="btnStartGame" class="primary-btn">
+                🚀 INICIAR ESPETÁCULO
+              </button>
+            </div>
+
+            <div class="controls-hint">
+              <span>🖱️ <strong>Mouse / Toque:</strong> Mova a gangorra diretamente</span>
+              <span>⌨️ <strong>Teclado:</strong> <kbd>←</kbd> <kbd>→</kbd> ou <kbd>A</kbd> <kbd>D</kbd> • <kbd>Espaço</kbd> Pausa/Lança</span>
+            </div>
+
+            <div class="remaster-credit-banner">
+              ✨ Remaster &amp; Adaptação Web por <a href="https://github.com/realzurr" target="_blank" rel="noopener noreferrer">github.com/realzurr</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Status & Quick Controls -->
+    <footer class="footer-bar">
+      <div class="status-items">
+        <div class="status-chip">
+          <span class="chip-label">Impulso da Gangorra:</span>
+          <div class="energy-meter" id="energyMeter">
+            <span class="bar active"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+          </div>
+        </div>
+        <div class="status-chip">
+          <span class="chip-label">Moedas no Teto:</span>
+          <strong id="coinsRemaining">60 / 60</strong>
+        </div>
+        <div class="status-chip credit-chip">
+          <span>Remaster: <a href="https://github.com/realzurr" target="_blank" rel="noopener noreferrer" class="credit-link">github.com/realzurr</a></span>
+        </div>
+      </div>
+
+      <div class="footer-actions">
+        <button id="btnPause" class="secondary-btn" disabled>⏸️ Pausar</button>
+        <button id="btnRestart" class="secondary-btn">🔄 Menu / Reiniciar</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Rules & Reverse Engineering Modal -->
+  <div class="modal-backdrop hidden" id="rulesModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📜 Regras Oficiais &amp; Dados da ROM (<code>CIRCUS.BIN</code>)</h3>
+        <button id="btnCloseRules" class="close-btn" aria-label="Fechar">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Esta versão web foi construída a partir da engenharia reversa direta do binário <strong><code>CIRCUS.BIN</code></strong> (4096 bytes, 6502 Assembly) presente no diretório.
+        </p>
+        <ul>
+          <li>
+            <strong>Gangorra e Dupla de Trapezistas (<code>$F500–$F566</code>):</strong>
+            Enquanto um trapezista aguarda em um lado da gangorra, o outro salta. Quando o trapezista em queda aterrissa no lado livre da gangorra, ela vira e lança o parceiro para o alto!
+          </li>
+          <li>
+            <strong>5 Curvas de Salto (<code>$F900–$F9C8</code>):</strong>
+            Aterrissar na ponta externa da gangorra aumenta o nível de impulso vertical; aterrissar no meio mantém o impulso; aterrissar perto do centro reduz o impulso e inverte a direção horizontal.
+          </li>
+          <li>
+            <strong>Trampolins Laterais (<code>$F100–$F12A</code>):</strong>
+            As molas nas paredes esquerda e direita salvam o trapezista e o arremessam de volta para a arena.
+          </li>
+          <li>
+            <strong>3 Fileiras de 20 Moedas no Teto (<code>$F1B2–$F225</code> &amp; <code>$F620–$F65E</code>):</strong>
+            <ul>
+              <li><strong>Fileira Superior (Ouro, gira p/ direita):</strong> 10 pontos por moeda. Limpar toda a fileira concede <strong>+100 pontos</strong> e <strong>+1 trapezista extra</strong> (até o limite de 5 vidas)!</li>
+              <li><strong>Fileira Central (Prata, gira p/ esquerda):</strong> 5 pontos por moeda. Limpar toda a fileira concede <strong>+50 pontos</strong>.</li>
+              <li><strong>Fileira Inferior (Bronze, gira p/ direita):</strong> 2 pontos por moeda. Limpar toda a fileira concede <strong>+20 pontos</strong>.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Patch de Controle (<code>$FA00–$FA32</code>):</strong>
+            O binário <code>CIRCUS.BIN</code> inclui suporte a joystick em <code>$FA00</code> além do controle clássico de paddle — aqui você pode usar tanto o <strong>Mouse/Toque</strong> (precisão de paddle) quanto o <strong>Teclado</strong> (setas ou A/D)!
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
