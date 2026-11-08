@@ -3,6 +3,8 @@
 Remasterização moderna para navegador do clássico **Circus** do Atari 2600, desenvolvida a partir da engenharia reversa direta da ROM original de 4 KB (`CIRCUS.BIN`, 6502 Assembly).
 
 > **Remaster & Adaptação Web por [@realzurr](https://github.com/realzurr)**
+>
+> 🌐 **Jogue Online Agora:** **[https://realzurr.github.io/circus/](https://realzurr.github.io/circus/)**
 
 ---
 
